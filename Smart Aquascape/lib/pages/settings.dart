@@ -21,13 +21,16 @@ class _SettingsPageUIState extends State<SettingsPageUI> {
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
-        title: const Text("Settings"),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context); // Kembali ke halaman sebelumnya
-          },
-          icon: const Icon(Icons.arrow_back, color: Colors.blue),
+        title: const Text(
+          "Settings",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
+        // leading: IconButton(
+        //   onPressed: () {
+        //     Navigator.pop(context); // Kembali ke halaman sebelumnya
+        //   },
+        //   icon: const Icon(Icons.arrow_back, color: Colors.blue),
+        // ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(10),

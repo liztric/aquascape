@@ -9,118 +9,124 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
-  // Variabel untuk menampung data dari Firebase
   double temperature = 0.0;
   double ph = 0.0;
+  bool isLoading = true;
 
-  // Referensi ke Realtime Database Firebase
-  final DatabaseReference databaseRef = FirebaseDatabase.instance
-      .ref('sensors'); // Mengubah referensi ke 'sensors'
+  final DatabaseReference databaseRef =
+      FirebaseDatabase.instance.ref('sensors');
 
   @override
   void initState() {
     super.initState();
-    _getSensorData(); // Panggil data saat halaman dibuka
+    _getSensorData();
   }
 
-  // Fungsi untuk mengambil data dari Firebase
   Future<void> _getSensorData() async {
-    try {
-      final snapshot = await databaseRef.get();
-      if (snapshot.exists) {
-        final data = snapshot.value as Map;
+    // Mendengarkan perubahan data secara real-time
+    databaseRef.onValue.listen((event) {
+      final snapshot = event.snapshot;
+      print('Snapshot exists: ${snapshot.exists}');
+      print('Snapshot value: ${snapshot.value}');
 
-        // Mengakses data dari objek 'sensors'
+      if (snapshot.exists && snapshot.value is Map) {
+        final data = Map<dynamic, dynamic>.from(snapshot.value as Map);
+
         setState(() {
-          temperature = double.tryParse(data['temperature'].toString()) ?? 0.0;
-          ph = double.tryParse(data['ph'].toString()) ?? 0.0;
+          temperature =
+              double.tryParse(data['temperature']?.toString() ?? '0') ?? 0.0;
+          ph = double.tryParse(data['ph']?.toString() ?? '0') ?? 0.0;
+          isLoading = false; // Menandakan bahwa data sudah berhasil dimuat
         });
       } else {
         print('Data tidak ditemukan!');
       }
-    } catch (e) {
-      print('Gagal mengambil data: $e');
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Monitoring Aquascape'),
         backgroundColor: Colors.blue,
+        title: const Text('Dashboard Monitoring',
+            style: TextStyle(color: Colors.black)),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: Colors.blue[50], // Background dengan warna lembut
-        ),
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildInfoCard('Suhu', '$temperature °C', Icons.thermostat),
-              const SizedBox(height: 16),
-              _buildInfoCard('pH', '$ph', Icons.science),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _getSensorData,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Refresh Data',
-                  style: TextStyle(color: Colors.black),
-                ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildDashboardRow(),
+                  const SizedBox(height: 40),
+                  // Tombol refresh dihapus
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
-  // Widget untuk menampilkan informasi dalam Card
-  Widget _buildInfoCard(String title, String value, IconData icon) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 40,
-              color: Colors.blue,
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ],
+  Widget _buildDashboardRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildDashboardItem(
+          title: 'Temperature',
+          value: '$temperature°C',
+          icon: Icons.thermostat_rounded,
+          color: Colors.orangeAccent,
         ),
+        _buildDashboardItem(
+          title: 'pH Level',
+          value: '$ph',
+          icon: Icons.science_outlined,
+          color: Colors.greenAccent,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDashboardItem({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 40),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, color: Colors.black),
+          ),
+        ],
       ),
     );
   }

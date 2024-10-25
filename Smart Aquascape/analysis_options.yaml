@@ -10,7 +10,7 @@
 analyzer:
   errors:
     unused_field: ignore
-    depend_on_referenced_packages: ignore
+    depend_on_referenced_packages: ignore ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:
