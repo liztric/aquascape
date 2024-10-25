@@ -288,6 +288,7 @@ class SmartDeviceCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     color: isOn ? Colors.blue : Colors.grey,
+                    fontWeight: FontWeight.bold
                   ),
                 ),
                 CupertinoSwitch(
