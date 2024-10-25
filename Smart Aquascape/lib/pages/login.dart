@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
             left: 0,
             right: 0,
             child: Container(
-              height: 250, // Tinggi bagian background atas (opsional)
+              height: 250, 
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(50),
